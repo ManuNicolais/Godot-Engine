@@ -1,0 +1,179 @@
+[gd_scene load_steps=15 format=3 uid="uid://bseipyy5gsqvy"]
+
+[ext_resource type="Script" path="res://Scenes/Player/Player2/cam_root.gd" id="1_17dhb"]
+[ext_resource type="Resource" uid="uid://n4rbx5tnqig" path="res://Scenes/Player/Player2/Movement/Stand.tres" id="1_osfey"]
+[ext_resource type="Resource" uid="uid://dgh58j6susnwb" path="res://Scenes/Player/Player2/JumpStates/air_jump.tres" id="1_v1wxg"]
+[ext_resource type="Resource" uid="uid://cr5b2hdmhabmm" path="res://Scenes/Player/Player2/JumpStates/ground_jump.tres" id="2_8oh75"]
+[ext_resource type="Resource" uid="uid://ck2waoveapkx" path="res://Scenes/Player/Player2/Movement/Walk.tres" id="2_q3il8"]
+[ext_resource type="Resource" uid="uid://d316fuog6yfds" path="res://Scenes/Player/Player2/Movement/Sprint.tres" id="3_ov7jh"]
+[ext_resource type="Resource" uid="uid://ba8js7ty5ti02" path="res://Scenes/Player/Player2/Movement/Run.tres" id="4_esof7"]
+
+[sub_resource type="GDScript" id="GDScript_52olk"]
+resource_name = "res://Scenes/Player/Player2/Jugador2.gd"
+script/source = "extends CharacterBody3D
+
+signal pressed_jump(jump_state : JumpState)
+signal set_movement_state(_movement_state: MovementState)
+signal set_movement_direction(_movement_direction: Vector3)
+
+@export var max_air_jump : int = 1
+@export var jump_states : Dictionary
+@export var movement_states : Dictionary
+
+var air_jump_counter : int = 0
+var movement_direction : Vector3
+
+func _input(event):
+	if event.is_action(\"Movement\"):
+		movement_direction.x = Input.get_action_strength(\"UI_Rigth\") - Input.get_action_strength(\"UI_Left\")
+		movement_direction.z = Input.get_action_strength(\"UI_Back\") - Input.get_action_strength(\"UI_Forward\")
+		
+		if is_movement_ongoing():
+			if Input.is_action_pressed(\"UI_Sprint\"):
+				set_movement_state.emit(movement_states[\"Sprint\"])
+			else:
+				if Input.is_action_pressed(\"UI_Walk\"):
+					set_movement_state.emit(movement_states[\"Walk\"])
+				else:
+					set_movement_state.emit(movement_states[\"Run\"])
+		else:
+			set_movement_state.emit(movement_states[\"Stand\"])
+
+func _ready():
+	set_movement_state.emit(movement_states[\"Stand\"])
+	
+func _physics_process(delta):
+	if is_movement_ongoing():
+		set_movement_direction.emit(movement_direction)
+		
+	if is_on_floor():
+		air_jump_counter = 0
+	elif air_jump_counter == 0:
+		air_jump_counter = 1
+		
+	if air_jump_counter <= max_air_jump:
+		if Input.is_action_pressed(\"UI_Jump\"):
+			var jump_name = \"Ground_jump\"
+			
+			if air_jump_counter > 0:
+				jump_name = \"Air_jump\"
+				
+			pressed_jump.emit(jump_states[jump_name])
+			air_jump_counter += 1
+		
+
+func is_movement_ongoing() -> bool:
+	return abs(movement_direction.x) > 0 or abs(movement_direction.z) > 0
+	
+"
+
+[sub_resource type="GDScript" id="GDScript_0cfm5"]
+resource_name = "MovementController.gd"
+script/source = "extends Node
+
+@export var player : CharacterBody3D
+@export var mesh_root : Node3D
+@export var rotation_speed : float = 8
+@export var fall_gravity = 45
+var jump_gravity : float = fall_gravity
+var direction : Vector3
+var velocity : Vector3
+var acceleration : float
+var speed : float
+var cam_rotation : float = 0
+
+func _physics_process(delta):
+	velocity.x = speed * direction.normalized().x
+	velocity.z = speed * direction.normalized().z
+	
+	if not player.is_on_floor():
+		if velocity.y >= 0:
+			velocity.y -= jump_gravity * delta
+		else:
+			velocity.y -= fall_gravity * delta
+
+	
+	player.velocity = player.velocity.lerp(velocity, acceleration * delta)
+	player.move_and_slide()
+	
+	var target_rotation = atan2(direction.x, direction.z) - player.rotation.y
+	mesh_root.rotation.y = lerp_angle(mesh_root.rotation.y, target_rotation, rotation_speed * delta)
+
+func _jump(jump_state : JumpStates):
+	velocity.y = 2 * jump_state.jump_height / jump_state.apex_duration
+	jump_gravity = velocity.y /jump_state.apex_duration
+
+func _on_set_movement_state(_movement_state : MovementState):
+	speed = _movement_state.movement_speed
+	acceleration = _movement_state.acceleration
+	
+func _on_set_movement_direction(_movement_direction : Vector3):
+	direction = _movement_direction.rotated(Vector3.UP, cam_rotation)
+
+func _on_set_cam_rotation(_cam_rotation: float):
+	cam_rotation = _cam_rotation
+"
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ln20u"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_wyi4k"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kgfp2"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ci6eb"]
+material = SubResource("StandardMaterial3D_kgfp2")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ih54m"]
+radius = 0.07
+
+[node name="Player" type="CharacterBody3D"]
+script = SubResource("GDScript_52olk")
+jump_states = {
+"Air_Jump": ExtResource("1_v1wxg"),
+"Ground_jump": ExtResource("2_8oh75")
+}
+movement_states = {
+"Run": ExtResource("4_esof7"),
+"Sprint": ExtResource("3_ov7jh"),
+"Stand": ExtResource("1_osfey"),
+"Walk": ExtResource("2_q3il8")
+}
+
+[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("player", "mesh_root")]
+script = SubResource("GDScript_0cfm5")
+player = NodePath("..")
+mesh_root = NodePath("../MeshRoot")
+rotation_speed = null
+fall_gravity = null
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_ln20u")
+
+[node name="MeshRoot" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshRoot"]
+mesh = SubResource("CapsuleMesh_wyi4k")
+skeleton = NodePath("")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(0.787068, 0, 0, 0, 0.322692, 0, 0, 0, 0.372633, 0, 0.446665, 0.424572)
+mesh = SubResource("BoxMesh_ci6eb")
+
+[node name="CamRoot" type="Node3D" parent="."]
+script = ExtResource("1_17dhb")
+
+[node name="CamYaw" type="Node3D" parent="CamRoot"]
+
+[node name="CamPitch" type="Node3D" parent="CamRoot/CamYaw"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CamRoot/CamYaw/CamPitch"]
+shape = SubResource("SphereShape3D_ih54m")
+spring_length = 3.0
+
+[node name="Camera3D" type="Camera3D" parent="CamRoot/CamYaw/CamPitch/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 0.994803, 0.10182, 0, -0.10182, 0.994803, 0, 1.09814, 2.54917)
+
+[connection signal="set_movement_direction" from="." to="MovementController" method="_on_set_movement_direction"]
+[connection signal="set_movement_state" from="." to="MovementController" method="_on_set_movement_state"]
+[connection signal="set_cam_rotation" from="CamRoot" to="MovementController" method="_on_set_cam_rotation"]

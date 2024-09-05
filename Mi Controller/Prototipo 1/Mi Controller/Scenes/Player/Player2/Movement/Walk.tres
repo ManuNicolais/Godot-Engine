@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MovementState" load_steps=2 format=3 uid="uid://ck2waoveapkx"]
+
+[ext_resource type="Script" path="res://Scenes/Player/Player2/Movement_State.gd" id="1_ugfra"]
+
+[resource]
+script = ExtResource("1_ugfra")
+id = 1
+movement_speed = 3.0
+acceleration = 7.0
+camera_fov = 75.5
