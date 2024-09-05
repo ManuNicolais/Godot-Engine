@@ -1,1 +1,1 @@
-#Controlador basico con un personaje y una camara
+Controlador basico con un personaje y una camara
