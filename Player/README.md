@@ -6,6 +6,7 @@ En el SpringArm3D modificamos los parametros para que la camara se encuentre en 
 # Objetos de la Escena "Player"
 
 CharacterBody3D
+
 |-MeshInstance3D "Cuerpo"
 |  |- MeshInstance3D "Ojos"
 |-CollisionShape3D
