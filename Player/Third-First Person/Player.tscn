@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=3 uid="uid://b2l7ccw2byoes"]
+
+[ext_resource type="Script" path="res://Scenes/Player/Player 3/player_3.gd" id="1_stcw8"]
+[ext_resource type="Material" uid="uid://ct0s3o8xukl2f" path="res://Scenes/Materiales/Azul.tres" id="2_0vadt"]
+[ext_resource type="Script" path="res://Scenes/Player/Player 3/cam_root.gd" id="3_2opha"]
+[ext_resource type="Script" path="res://Scenes/Player/Player 3/cam_origin.gd" id="3_w3tkv"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_8cqkq"]
+material = ExtResource("2_0vadt")
+
+[sub_resource type="BoxMesh" id="BoxMesh_xk02t"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qn72r"]
+radius = 0.588108
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_7eje7"]
+radius = 0.07
+
+[node name="CharacterBody3D" type="CharacterBody3D"]
+script = ExtResource("1_stcw8")
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CapsuleMesh_8cqkq")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cuerpo"]
+transform = Transform3D(0.674996, 0, 0, 0, 0.219021, 0, 0, 0, 0.357751, 0, 0.406, -0.392)
+mesh = SubResource("BoxMesh_xk02t")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_qn72r")
+
+[node name="CamOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42547, 0)
+script = ExtResource("3_w3tkv")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CamOrigin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.289491)
+spring_length = -0.3
+margin = 0.5
+
+[node name="Camera3D" type="Camera3D" parent="CamOrigin/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.197638)
+
+[node name="CamRoot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.41506, 0)
+script = ExtResource("3_2opha")
+
+[node name="CamYaw" type="Node3D" parent="CamRoot"]
+
+[node name="CamPitch" type="Node3D" parent="CamRoot/CamYaw"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CamRoot/CamYaw/CamPitch"]
+shape = SubResource("SphereShape3D_7eje7")
+spring_length = 3.0
+
+[node name="Camera3D" type="Camera3D" parent="CamRoot/CamYaw/CamPitch/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 0.994803, 0.10182, 0, -0.10182, 0.994803, 0, 1.09814, 2.54917)
