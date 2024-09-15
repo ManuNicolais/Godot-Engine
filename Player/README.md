@@ -8,9 +8,13 @@ En el SpringArm3D modificamos los parametros para que la camara se encuentre en 
 CharacterBody3D
 
 |-MeshInstance3D "Cuerpo"
+
 |  |- MeshInstance3D "Ojos"
+  
 |-CollisionShape3D
+
 |-Node3D "CamOrigin"
+
   |- SpringArm3D
     |- Camara3D
 
