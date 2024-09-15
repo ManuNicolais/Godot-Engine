@@ -16,6 +16,7 @@ CharacterBody3D
 |-Node3D "CamOrigin"
 
   |- SpringArm3D
-    |- Camara3D
-
+  
+   |- Camara3D
+    
 Le asignamos un Script al CharacterBody3D para manipular su comportamiento, por defecto Godot nos da un "esqueleto" del movimiento del jugador, al que nosotros modificaremos.
