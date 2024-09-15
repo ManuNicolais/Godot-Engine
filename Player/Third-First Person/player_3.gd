@@ -3,7 +3,7 @@ extends CharacterBody3D
 var speed : float
 const WALK_SPEED = 5.0
 const SPRINT_SPEED = 7.0
-const JUMP_VELOCITY = 4.5
+const JUMP_VELOCITY = 5.0
 
 @onready var camera1_controller = $CamOrigin/SpringArm3D/Camera3D  # Cámara de primera persona
 @onready var camera2_controller = $CamRoot/CamYaw/CamPitch/SpringArm3D/Camera3D  # Cámara de tercera persona
@@ -83,12 +83,16 @@ func _physics_process(delta):
 		player_model.rotation.y = camera1_controller.global_transform.basis.get_euler().y
 	
 	# Mover el personaje solo si hay dirección de movimiento
-	if direction != Vector3.ZERO:
-		velocity.x = direction.x * speed
-		velocity.z = direction.z * speed
+	if is_on_floor():
+		if direction != Vector3.ZERO:
+			velocity.x = direction.x * speed
+			velocity.z = direction.z * speed
+		else:
+			velocity.x = lerp(velocity.x, direction.x * speed, delta * 7.0)
+			velocity.z = lerp(velocity.z, direction.z * speed, delta * 7.0)
 	else:
-		velocity.x = 0
-		velocity.z = 0
+		velocity.x = lerp(velocity.x, direction.x * speed, delta * 3.0)
+		velocity.z = lerp(velocity.z, direction.z * speed, delta * 3.0)
 
 	move_and_slide()
 
