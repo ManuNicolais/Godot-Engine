@@ -5,11 +5,17 @@ En el SpringArm3D modificamos los parametros para que la camara se encuentre en 
 
 # Objetos de la Escena "Player"
 CharacterBody3D
+
 |-MeshInstance3D "Cuerpo"
+
 |  |- MeshInstance3D "Ojos"
+
 |-CollisionShape3D
+
 |-Node3D "CamOrigin"
+
   |- SpringArm3D
+  
     |- Camara3D
 
 Le asignamos un Script al CharacterBody3D para manipular su comportamiento, por defecto Godot nos da un "esqueleto" del movimiento del jugador, al que nosotros modificaremos.
