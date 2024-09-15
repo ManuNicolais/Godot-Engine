@@ -79,3 +79,4 @@ func _botarCabeza(time) -> Vector3:
 	pos.x = cos(time * bote_freq / 2) * bote_ampli
 	
 	return pos
+
