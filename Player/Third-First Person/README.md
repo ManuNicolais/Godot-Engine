@@ -1,5 +1,5 @@
 # Solo enfocandome en la camara y cambiar de camaras.
-Con el boton C puedo cambiar entre 1ra Persona y 3ra Persona
+Con el boton UI_CamChange puedo cambiar entre 1ra Persona y 3ra Persona
 
 ## camara_FP.gd adjuntarla al nodo3D "CamOrigin"
 
